@@ -1,5 +1,6 @@
 defmodule Modbus.Response do
   @moduledoc false
+  require Logger
   alias Modbus.Helper
 
   def pack({:rc, slave, _address, count}, values) do
@@ -84,6 +85,11 @@ defmodule Modbus.Response do
     nil
   end
 
+  def parse({_cmd, _slave, _address, _count_value}, response) do
+    Logger.error("Can't parse response - #{inspect(response)}")
+    :error
+  end
+
   def length({:rc, _slave, _address, count}) do
     3 + Helper.byte_count(count)
   end
@@ -122,8 +128,7 @@ defmodule Modbus.Response do
   end
 
   defp writes(_type, slave, function, address, values) do
-    count =  Enum.count(values)
+    count = Enum.count(values)
     <<slave, function, address::16, count::16>>
   end
-
 end
